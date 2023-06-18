@@ -50,13 +50,21 @@ export class BookController {
                     "keywords.keyword": { $regex: keywordSearch }
                 }
             }
-
+            if (req.query.publisher && req.query.publisher !== "") {
+                let publisherdFind = req.query.publisher || "";
+                let publisher = await Publisher.findOne({ name: { $regex: publisherdFind } })
+                query = {
+                    ...query,
+                    publisher: publisher
+                }
+            }
             const allBook = await Book.find(query).populate(
                 [
                     { path: "category", select: "name" },
                     { path: "publisher", select: "name" }
                 ]
             );
+
             let totalPage = Math.ceil(allBook.length / size);
             let offset = (page - 1) * size;
             const books = await Book.find(query).populate(
