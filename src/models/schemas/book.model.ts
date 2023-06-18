@@ -4,7 +4,7 @@ interface IBook {
     category: object;
     name: string;
     author: string;
-    keywords: object[];
+    keywords: any;
     publisher: object
 }
 

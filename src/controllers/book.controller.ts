@@ -78,4 +78,65 @@ export class BookController {
             res.render(err.message);
         }
     }
+
+    static async getUpdatePage(req: any, res: any) {
+        try {
+            let { page, limit } = req.query;
+            if (page && limit) {
+                const categories = await Category.find();
+                const publishers = await Publisher.find();
+                const book = await Book.findOne({ _id: req.params.id }).populate(
+                    [
+                        { path: "category", select: "name" },
+                        { path: "publisher", select: "name" }
+                    ]
+                );
+                if (book) {
+                    res.render("update", { book: book, categories: categories, publishers: publishers, pageCurrent: page, limit: limit })
+                } else res.render('error');
+            }
+        } catch (err) {
+            res.render(err.message);
+        }
+    }
+
+    static async updateBook(req: any, res: any) {
+        try {
+            let { page, limit } = req.query;
+            if (page && limit) {
+                const book = await Book.findOne({ _id: req.params.id }).populate(
+                    [
+                        { path: "category", select: "name" },
+                        { path: "publisher", select: "name" }
+                    ]
+                );
+
+                book.name = req.body.name;
+                book.author = req.body.author;
+                book.keywords[0].keyword = req.body.keyword;
+                book.category = req.body.categoryID;
+                book.publisher = req.body.publisherID;
+                
+                await book.save();
+                if (book) res.redirect(`/?page=${page}&limit=${limit}`);
+                else res.render('error');
+            }
+        } catch (err) {
+            res.render(err.message);
+        }
+    }
+
+    static async deleteBook(req: any, res: any) {
+        try {
+            let { page, limit } = req.query;
+            if (page && limit && req.params.id) {
+                await Book.deleteOne({ _id: req.params.id });
+                res.redirect(`/?page=${page}&limit=${limit}`)
+            } else {
+                res.render("error");
+            }
+        } catch (err) {
+            res.render(err.message);
+        }
+    }
 }
